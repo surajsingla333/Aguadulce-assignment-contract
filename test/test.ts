@@ -207,5 +207,22 @@ describe("Continent", function () {
           .transferContinent(signers[8], { value: teamsFees })
       ).to.be.reverted;
     });
+
+    it("Signer 5 tries to be citizen of Continent 6 of Signer 6 but fails", async () => {
+      const { continent, signers } = await loadFixture(
+        deployAndMintContinent
+      );
+      await initialSetup();
+
+      const citizenTaxForContinent6 = await continent.citizenTaxForContinent(6);
+
+      // reverting because signer 1 is an owner of a continent
+      await expect(
+        continent
+          .connect(signers[5])
+          .becomeCitizen(6, { value: citizenTaxForContinent6})
+      ).to.be.reverted;
+
+    });
   });
 });
