@@ -142,6 +142,27 @@ contract Continent is
         return super.supportsInterface(interfaceId);
     }
 
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory data
+    )
+        public
+        override(ERC721Upgradeable, IERC721)
+        isContinentOwner(from)
+        checkNotContinentOwner(to)
+        isNotACitizen(to)
+    {
+        require(
+            ownerContinentTokenId[from] == tokenId,
+            "From address is not the owner of the token"
+        );
+        super.safeTransferFrom(from, to, tokenId, data);
+        ownerContinentTokenId[from] = 0;
+        ownerContinentTokenId[to] = tokenId;
+    }
+
     // Asignment specific functions
 
     // Function called by continent owner to update citizenTax
@@ -222,18 +243,20 @@ contract Continent is
         uint256 continentId = ownerContinentTokenId[_msgSender()];
 
         super.safeTransferFrom(_msgSender(), toAddress, continentId);
-        ownerContinentTokenId[_msgSender()] = 0;
-        ownerContinentTokenId[toAddress] = continentId;
         payable(owner()).transfer(msg.value);
     }
 
     // Get list of all citizens of the continent
-    function getCitizens(uint256 continentId) public view returns (address[] memory) {
+    function getCitizens(
+        uint256 continentId
+    ) public view returns (address[] memory) {
         return listOfCitizensOfContinent[continentId];
     }
 
     // Get list of all continents the user is a citizen in
-    function getContinentOfCitizenship(address user) public view returns (uint256[] memory) {
+    function getContinentOfCitizenship(
+        address user
+    ) public view returns (uint256[] memory) {
         return listOfContinentOfCitizenship[user];
     }
 }
