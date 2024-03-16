@@ -29,8 +29,8 @@ contract Continent is
     mapping(uint256 => uint256) public citizenTaxForContinent;
     mapping(address => uint256) public ownerContinentTokenId;
 
-    mapping(uint256 => address[]) public listOfCitizensOfContinent;
-    mapping(address => uint256[]) public listOfContinentOfCitizenship;
+    mapping(uint256 => address[]) private listOfCitizensOfContinent;
+    mapping(address => uint256[]) private listOfContinentOfCitizenship;
     mapping(uint256 => mapping(address => bool))
         public checkIsCitizenOfContinent;
 
@@ -226,5 +226,15 @@ contract Continent is
         ownerContinentTokenId[_msgSender()] = 0;
         ownerContinentTokenId[toAddress] = continentId;
         payable(owner()).transfer(msg.value);
+    }
+
+    // Get list of all citizens of the continent
+    function getCitizens(uint256 continentId) public view returns (address[] memory) {
+        return listOfCitizensOfContinent[continentId];
+    }
+
+    // Get list of all continents the user is a citizen in
+    function getContinentOfCitizenship(address user) public view returns (uint256[] memory) {
+        return listOfContinentOfCitizenship[user];
     }
 }
