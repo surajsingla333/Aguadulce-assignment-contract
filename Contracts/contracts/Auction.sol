@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -9,11 +8,12 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract NFTAuction is Initializable, UUPSUpgradeable, OwnableUpgradeable {
-    mapping(address => mapping(uint256 => Auction)) public nftContractAuctions;
+contract Auction is Initializable, UUPSUpgradeable, OwnableUpgradeable {
+    mapping(address => mapping(uint256 => AuctionType))
+        public nftContractAuctions;
     mapping(address => uint256) failedTransferCredits;
     //Each Auction is unique to each NFT (contract + id pairing).
-    struct Auction {
+    struct AuctionType {
         //map token ID to
         uint32 bidIncreasePercentage;
         uint32 auctionBidPeriod; //Increments the length of time the auction is open in which a new bid can be made after each bid.
@@ -144,6 +144,14 @@ contract NFTAuction is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         _;
     }
 
+    modifier checkNftApprove(address _nftContractAddress, uint256 _tokenId) {
+        require(
+            IERC721(_nftContractAddress).getApproved(_tokenId) == address(this),
+            "Approve the NFT to start auction"
+        );
+        _;
+    }
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
@@ -216,33 +224,33 @@ contract NFTAuction is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         return (_totalBid * (_percentage)) / 10000;
     }
 
-    // Approve Auction contract to transfer NFT
-    function _approveNftToAuctionContract(
-        address _nftContractAddress,
-        uint256 _tokenId
-    ) internal {
-        if (
-            IERC721(_nftContractAddress).getApproved(_tokenId) != address(this)
-        ) {
-            address _nftSeller = nftContractAuctions[_nftContractAddress][
-                _tokenId
-            ].nftSeller;
-            if (IERC721(_nftContractAddress).ownerOf(_tokenId) == _nftSeller) {
-                IERC721(_nftContractAddress).approve(address(this), _tokenId);
-                require(
-                    IERC721(_nftContractAddress).getApproved(_tokenId) ==
-                        address(this),
-                    "nft approval failed"
-                );
-            } else {
-                require(
-                    IERC721(_nftContractAddress).getApproved(_tokenId) ==
-                        address(this),
-                    "Seller doesn't own NFT"
-                );
-            }
-        }
-    }
+    // // Approve Auction contract to transfer NFT
+    // function _approveNftToAuctionContract(
+    //     address _nftContractAddress,
+    //     uint256 _tokenId
+    // ) internal {
+    //     if (
+    //         IERC721(_nftContractAddress).getApproved(_tokenId) != address(this)
+    //     ) {
+    //         address _nftSeller = nftContractAuctions[_nftContractAddress][
+    //             _tokenId
+    //         ].nftSeller;
+    //         if (IERC721(_nftContractAddress).ownerOf(_tokenId) == _nftSeller) {
+    //             IERC721(_nftContractAddress).approve(address(this), _tokenId);
+    //             require(
+    //                 IERC721(_nftContractAddress).getApproved(_tokenId) ==
+    //                     address(this),
+    //                 "nft approval failed"
+    //             );
+    //         } else {
+    //             require(
+    //                 IERC721(_nftContractAddress).getApproved(_tokenId) ==
+    //                     address(this),
+    //                 "Seller doesn't own NFT"
+    //             );
+    //         }
+    //     }
+    // }
 
     // Create Auction functions
 
@@ -327,10 +335,9 @@ contract NFTAuction is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     function _updateOngoingAuction(
         address _nftContractAddress,
         uint256 _tokenId
-    ) internal {
+    ) internal checkNftApprove(_nftContractAddress, _tokenId) {
         //min price not set, nft not up for auction yet
         if (_isMinimumBidMade(_nftContractAddress, _tokenId)) {
-            _approveNftToAuctionContract(_nftContractAddress, _tokenId);
             _updateAuctionEnd(_nftContractAddress, _tokenId);
         }
     }
@@ -406,10 +413,7 @@ contract NFTAuction is Initializable, UUPSUpgradeable, OwnableUpgradeable {
             .nftHighestBidder = msg.sender;
 
         if (prevNftHighestBidder != address(0)) {
-            _payout(
-                prevNftHighestBidder,
-                prevNftHighestBid
-            );
+            _payout(prevNftHighestBidder, prevNftHighestBid);
         }
     }
 
@@ -436,8 +440,8 @@ contract NFTAuction is Initializable, UUPSUpgradeable, OwnableUpgradeable {
             _nftSeller,
             _nftHighestBid
         );
-        IERC721(_nftContractAddress).transferFrom(
-            address(this),
+        IERC721(_nftContractAddress).safeTransferFrom(
+            _nftSeller,
             _nftHighestBidder,
             _tokenId
         );
@@ -472,16 +476,10 @@ contract NFTAuction is Initializable, UUPSUpgradeable, OwnableUpgradeable {
                 fee
             );
         }
-        _payout(
-            _nftSeller,
-            (_highestBid - feesPaid)
-        );
+        _payout(_nftSeller, (_highestBid - feesPaid));
     }
 
-    function _payout(
-        address _recipient,
-        uint256 _amount
-    ) internal {
+    function _payout(address _recipient, uint256 _amount) internal {
         // attempt to send the funds to the recipient
         (bool success, ) = payable(_recipient).call{value: _amount, gas: 20000}(
             ""
@@ -540,12 +538,12 @@ contract NFTAuction is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         onlyNftSeller(_nftContractAddress, _tokenId)
         minimumBidNotMade(_nftContractAddress, _tokenId)
         priceGreaterThanZero(_newMinPrice)
+        checkNftApprove(_nftContractAddress, _tokenId)
     {
         nftContractAuctions[_nftContractAddress][_tokenId]
             .minPrice = _newMinPrice;
 
         if (_isMinimumBidMade(_nftContractAddress, _tokenId)) {
-            _approveNftToAuctionContract(_nftContractAddress, _tokenId);
             _updateAuctionEnd(_nftContractAddress, _tokenId);
         }
     }
@@ -553,13 +551,16 @@ contract NFTAuction is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     function takeHighestBid(
         address _nftContractAddress,
         uint256 _tokenId
-    ) external onlyNftSeller(_nftContractAddress, _tokenId) {
+    )
+        external
+        onlyNftSeller(_nftContractAddress, _tokenId)
+        checkNftApprove(_nftContractAddress, _tokenId)
+    {
         require(
             nftContractAuctions[_nftContractAddress][_tokenId].nftHighestBid >
                 0,
             "cannot payout 0 bid"
         );
-        _approveNftToAuctionContract(_nftContractAddress, _tokenId);
         _transferNftAndPaySeller(_nftContractAddress, _tokenId);
     }
 

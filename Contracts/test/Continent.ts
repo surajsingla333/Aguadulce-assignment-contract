@@ -95,6 +95,9 @@ describe("Continent", function () {
       await expect(continent.connect(signers[1]).transferContinent(signers[8]))
         .to.be.reverted;
 
+      expect(await continent.ownerContinentTokenId(signers[1])).to.equal(1);
+      expect(await continent.ownerContinentTokenId(signers[8])).to.equal(0);
+
       // reverting if send lesser amount
       await expect(
         continent
@@ -108,6 +111,9 @@ describe("Continent", function () {
 
       expect(await continent.balanceOf(signers[1].address)).to.equal(0);
       expect(await continent.balanceOf(signers[8].address)).to.equal(1);
+
+      expect(await continent.ownerContinentTokenId(signers[1])).to.equal(0);
+      expect(await continent.ownerContinentTokenId(signers[8])).to.equal(1);
 
       expect(await ethers.provider.getBalance(owner)).to.equal(
         earlierOwnerBalance + teamsFees
