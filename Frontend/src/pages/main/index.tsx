@@ -1,14 +1,14 @@
-import ConnectWalletButtonWallet from "../../components/WalletButtons/ConnectWalletButtonWallet";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { useNavigate } from "react-router-dom";
 import { readContract, writeContract } from "@wagmi/core";
-
+import { formatEther } from "ethers";
 import AuctionModal from "../../components/AuctionModal";
 import { ContinentNftAddress } from "../../lib/ABI/Continent";
 import { ZERO_ADDRESS, AUCTION, CONTINENT_NFT } from "../../utils/const";
 import { manageError } from "../../utils/helper";
 import Loader from "../../components/Loader";
+import ConnectWalletButtonWallet from "../../components/WalletButtons/ConnectWalletButtonWallet";
 
 const Main = () => {
   const [showAuctionModal, setShowAuctionModal] = useState<boolean>(false);
@@ -170,7 +170,7 @@ const Main = () => {
                       Current highest bid details
                     </h2>
                     <div>Bidder: {auctionData[5]}</div>
-                    <div>Bid amount: {auctionData[4]}</div>
+                    <div>Bid amount: {formatEther(auctionData[4])}</div>
                     <button
                       type="button"
                       className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
