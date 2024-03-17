@@ -4,8 +4,6 @@ async function main() {
   const signers = await ethers.getSigners();
   const [deployer] = signers;
 
-  console.log({ deployer });
-
   const Continent = await ethers.getContractFactory("Continent");
   const continent = await upgrades.deployProxy(Continent, [deployer.address]);
 
@@ -25,8 +23,12 @@ async function main() {
   await continent.setTeamsFees(teamsFees);
 
   for (let i = 1; i <= 7; i++) {
+    await continent.safeMint(signers[i].address);
     await continent.connect(signers[i]).setCitizenTax(citizenTax);
   }
+
+  console.log("Initial Setup completed");
+  return;
 }
 
 main();
