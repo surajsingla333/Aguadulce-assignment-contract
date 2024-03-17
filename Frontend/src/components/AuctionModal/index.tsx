@@ -4,6 +4,7 @@ import { parseEther } from "ethers";
 import { writeContract } from "@wagmi/core";
 
 import { CONTINENT_NFT, AUCTION } from "../../utils/const";
+import {manageError} from "../../utils/helper"
 
 type AuctionModalT = {
   setShowAuctionModal: (bool: boolean) => any;
@@ -69,8 +70,7 @@ const AuctionModal = ({
           throw "Something went wrong while approving token.";
         }
       } catch (e) {
-        console.log({ e });
-        alert("Something went wrong, please try again.");
+        manageError(e);
       }
     } else {
       alert("Invalid form values.");
