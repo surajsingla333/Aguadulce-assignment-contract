@@ -8,6 +8,7 @@ import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi/react";
 
 import { WagmiConfig } from "wagmi";
 import { polygonMumbai, localhost } from "viem/chains";
+import AppLayout from "./components/AppLayout";
 
 const projectId = "904623217cd89ca1a411940339ad0a1c";
 
@@ -28,7 +29,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
       <WagmiConfig config={wagmiConfig}>
-        <AppRoutes />
+        <AppLayout>
+          <AppRoutes />
+        </AppLayout>
       </WagmiConfig>
     </BrowserRouter>
   </React.StrictMode>

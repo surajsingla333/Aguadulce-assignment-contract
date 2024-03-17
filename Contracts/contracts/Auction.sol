@@ -204,14 +204,17 @@ contract Auction is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         address _nftContractAddress,
         uint256 _tokenId
     ) internal view returns (bool) {
-        //if the NFT is up for auction, the bid needs to be a % higher than the previous bid
-        uint256 bidIncreaseAmount = (nftContractAuctions[_nftContractAddress][
+        uint256 highestBid = nftContractAuctions[_nftContractAddress][_tokenId]
+            .nftHighestBid;
+        uint256 minimumPrice = nftContractAuctions[_nftContractAddress][
             _tokenId
-        ].nftHighestBid *
+        ].minPrice;
+        //if the NFT is up for auction, the bid needs to be a % higher than the previous bid
+        uint256 bidIncreaseAmount = (highestBid *
             (10000 +
                 nftContractAuctions[_nftContractAddress][_tokenId]
                     .bidIncreasePercentage)) / 10000;
-        return (msg.value >= bidIncreaseAmount);
+        return (msg.value > minimumPrice && msg.value >= bidIncreaseAmount);
     }
 
     /*

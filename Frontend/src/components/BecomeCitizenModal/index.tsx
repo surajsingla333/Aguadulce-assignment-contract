@@ -4,6 +4,7 @@ import { formatEther, parseEther } from "ethers";
 import { writeContract, readContract } from "@wagmi/core";
 
 import { CONTINENT_NFT } from "../../utils/const";
+import { manageError } from "../../utils/helper";
 
 type CitizenshipModalT = {
   setShowCitizenshipModal: (bool: boolean) => any;
@@ -35,19 +36,22 @@ const CitizenshipModal = ({
         throw "Something went wrong while creating auction.";
       }
     } catch (e) {
-      console.log({ e });
-      alert("Something went wrong, please try again.");
+      manageError(e);
     }
   };
 
   const getCitizenShipTax = async () => {
-    const citizenShipTax = await readContract({
-      ...CONTINENT_NFT,
-      functionName: "citizenTaxForContinent",
-      args: [nftId],
-    });
+    try {
+      const citizenShipTax = await readContract({
+        ...CONTINENT_NFT,
+        functionName: "citizenTaxForContinent",
+        args: [nftId],
+      });
 
-    setTax(Number(formatEther(`${citizenShipTax}`)));
+      setTax(Number(formatEther(`${citizenShipTax}`)));
+    } catch (e) {
+      manageError(e);
+    }
   };
   useEffect(() => {
     getCitizenShipTax();
