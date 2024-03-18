@@ -20,7 +20,6 @@ const metadata = {
 };
 
 const chains = [polygonMumbai, { ...localhost, id: 31_337 }];
-// const chains = [polygonMumbai, { ...localhost, id: 31_337 }];
 const wagmiConfig = defaultWagmiConfig({ chains, projectId, metadata });
 
 createWeb3Modal({ wagmiConfig, projectId, chains });

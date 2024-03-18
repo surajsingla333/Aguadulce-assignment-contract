@@ -2,11 +2,10 @@
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { useNavigate } from "react-router-dom";
-import { readContract, readContracts } from "@wagmi/core";
+import { readContract, readContracts, getNetwork } from "@wagmi/core";
 
 import CitizenshipModal from "../../components/BecomeCitizenModal";
-import { CONTINENT_NFT } from "../../utils/const";
-import { manageError } from "../../utils/helper";
+import { manageError, getContinentNftContract } from "../../utils/helper";
 import Loader from "../../components/Loader";
 
 const Continent = () => {
@@ -52,7 +51,13 @@ const Continent = () => {
   const getAllContinents = async () => {
     setIsLoading(true);
     try {
-      const contracts = [];
+      const network = getNetwork()?.chain?.id
+        ? getNetwork()?.chain?.id
+        : "default";
+
+      const CONTINENT_NFT = getContinentNftContract(network);
+
+      const contracts: any = [];
       for (let i = 1; i <= 7; i++) {
         contracts.push({
           ...CONTINENT_NFT,
@@ -63,8 +68,6 @@ const Continent = () => {
       const readNftData = await readContracts({
         contracts,
       });
-
-      console.log({ readNftData });
 
       const allTokenData = [];
 
@@ -86,6 +89,12 @@ const Continent = () => {
 
   const checkUserStatus = async () => {
     try {
+      const network = getNetwork()?.chain?.id
+        ? getNetwork()?.chain?.id
+        : "default";
+
+      const CONTINENT_NFT = getContinentNftContract(network);
+
       const continentId = await readContract({
         ...CONTINENT_NFT,
         functionName: "ownerContinentTokenId",
@@ -99,8 +108,6 @@ const Continent = () => {
         functionName: "getContinentOfCitizenship",
         args: [address],
       });
-
-      console.log({ listOfContinents });
 
       setListOfCitizenShipContinents(
         listOfContinents.map((r: any) => Number(r))

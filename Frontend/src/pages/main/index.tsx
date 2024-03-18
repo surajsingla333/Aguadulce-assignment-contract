@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { useNavigate } from "react-router-dom";
-import { readContract, writeContract } from "@wagmi/core";
+import { readContract, writeContract, getNetwork } from "@wagmi/core";
 import { formatEther } from "ethers";
 import AuctionModal from "../../components/AuctionModal";
-import { ContinentNftAddress } from "../../lib/ABI/Continent";
-import { ZERO_ADDRESS, AUCTION, CONTINENT_NFT } from "../../utils/const";
-import { manageError } from "../../utils/helper";
+import { ZERO_ADDRESS } from "../../utils/const";
+import {
+  manageError,
+  getDate,
+  getContinentNftContract,
+  getAuctionContract,
+} from "../../utils/helper";
 import Loader from "../../components/Loader";
 import ConnectWalletButtonWallet from "../../components/WalletButtons/ConnectWalletButtonWallet";
 
@@ -44,12 +48,18 @@ const Main = () => {
   const getData = async () => {
     setIsLoading(true);
     try {
+      const network = getNetwork()?.chain?.id
+        ? getNetwork()?.chain?.id
+        : "default";
+
+      const CONTINENT_NFT = getContinentNftContract(network);
+      const AUCTION = getAuctionContract(network);
+
       const data = await readContract({
         ...CONTINENT_NFT,
         functionName: "ownerContinentTokenId",
         args: [address],
       });
-      console.log({ data });
 
       setCurrentNftId(Number(data));
 
@@ -60,7 +70,6 @@ const Main = () => {
           functionName: "tokenURI",
           args: [data],
         });
-        console.log({ tokenUri });
       }
       if (tokenUri) {
         const tokenDetails = await fetch(tokenUri.toString());
@@ -69,10 +78,9 @@ const Main = () => {
         const AuctionDataTemp = await readContract({
           ...AUCTION,
           functionName: "nftContractAuctions",
-          args: [ContinentNftAddress, data],
+          args: [CONTINENT_NFT.address, data],
         });
 
-        console.log("AuctionData ", AuctionDataTemp);
         setAuctionData(AuctionDataTemp);
       }
     } catch (e) {
@@ -94,13 +102,24 @@ const Main = () => {
 
   const settleAuction = async () => {
     try {
+      const network = getNetwork()?.chain?.id
+        ? getNetwork()?.chain?.id
+        : "default";
+
+      const CONTINENT_NFT = getContinentNftContract(network);
+      const AUCTION = getAuctionContract(network);
+
       const AuctionDataTemp = await writeContract({
         ...AUCTION,
         functionName: "settleAuction",
-        args: [ContinentNftAddress, currentNftId],
+        args: [CONTINENT_NFT.address, currentNftId],
       });
 
-      console.log("AuctionDataTemp", AuctionDataTemp);
+      if (AuctionDataTemp && AuctionDataTemp.hash) {
+        handleOnAuctionSuccess();
+      } else {
+        throw "Something went wrong while creating auction.";
+      }
     } catch (e) {
       manageError(e);
     }
@@ -171,6 +190,10 @@ const Main = () => {
                     </h2>
                     <div>Bidder: {auctionData[5]}</div>
                     <div>Bid amount: {formatEther(auctionData[4])}</div>
+
+                    {Number(auctionData[2]) > 0 && (
+                      <div>Auction ends at: {getDate(auctionData[2])} </div>
+                    )}
                     <button
                       type="button"
                       className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"

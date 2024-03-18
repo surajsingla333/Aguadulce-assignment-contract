@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { formatEther, parseEther } from "ethers";
-import { writeContract, readContract } from "@wagmi/core";
-
-import { CONTINENT_NFT } from "../../utils/const";
-import { manageError } from "../../utils/helper";
+import { writeContract, readContract, getNetwork } from "@wagmi/core";
+import axios from "axios";
+import { manageError, getContinentNftContract } from "../../utils/helper";
 
 type CitizenshipModalT = {
   setShowCitizenshipModal: (bool: boolean) => any;
@@ -21,6 +20,12 @@ const CitizenshipModal = ({
 
   const becomeCitizen = async () => {
     try {
+      const network = getNetwork()?.chain?.id
+        ? getNetwork()?.chain?.id
+        : "default";
+
+      const CONTINENT_NFT = getContinentNftContract(network);
+
       const becomeCitizenCall = await writeContract({
         ...CONTINENT_NFT,
         functionName: "becomeCitizen",
@@ -28,7 +33,6 @@ const CitizenshipModal = ({
         value: parseEther(`${tax}`),
       });
 
-      console.log({ becomeCitizenCall });
       if (becomeCitizenCall && becomeCitizenCall.hash) {
         handleOnCitizenshipSuccess();
         setShowCitizenshipModal(false);
@@ -40,8 +44,43 @@ const CitizenshipModal = ({
     }
   };
 
+  const makeOtherAccountACitizen = async () => {
+    try {
+      const becomeCitizenData = await axios.post(
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/become-citizen`,
+        {
+          networkId: getNetwork()?.chain?.id,
+          continentId: nftId,
+          value: tax,
+        },
+        {
+          headers: {
+            withCredentials: false,
+          },
+        }
+      );
+
+      const { data } = becomeCitizenData.data;
+      if (data) {
+        handleOnCitizenshipSuccess();
+        setShowCitizenshipModal(false);
+      } else {
+        throw "Something went wrong while creating auction.";
+      }
+    } catch (e: any) {
+      manageError(e);
+    }
+  };
+
   const getCitizenShipTax = async () => {
     try {
+
+      const network = getNetwork()?.chain?.id
+        ? getNetwork()?.chain?.id
+        : "default";
+
+      const CONTINENT_NFT = getContinentNftContract(network);
+
       const citizenShipTax = await readContract({
         ...CONTINENT_NFT,
         functionName: "citizenTaxForContinent",
@@ -107,6 +146,14 @@ const CitizenshipModal = ({
                 onClick={becomeCitizen}
               >
                 Submit
+              </button>
+
+              <button
+                type="button"
+                className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700"
+                onClick={makeOtherAccountACitizen}
+              >
+                Make other user a citizen
               </button>
             </div>
           </div>
