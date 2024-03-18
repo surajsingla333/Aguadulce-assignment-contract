@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { parseEther } from "ethers";
-import { writeContract } from "@wagmi/core";
-
-import { CONTINENT_NFT, AUCTION } from "../../utils/const";
-import { manageError, checkIsValidAmount } from "../../utils/helper";
+import { writeContract, getNetwork } from "@wagmi/core";
+import {
+  manageError,
+  checkIsValidAmount,
+  getAuctionContract,
+  getContinentNftContract,
+} from "../../utils/helper";
 
 type BidModalT = {
   setShowBidModal: (bool: boolean) => any;
@@ -21,6 +24,13 @@ const BidModal = ({
 
   const placeBid = async () => {
     const isValidInput = checkIsValidAmount(bidAmount, nftDetails.auction);
+
+    const network = getNetwork()?.chain?.id
+      ? getNetwork()?.chain?.id
+      : "default";
+
+    const CONTINENT_NFT = getContinentNftContract(network);
+    const AUCTION = getAuctionContract(network);
 
     if (isValidInput) {
       try {

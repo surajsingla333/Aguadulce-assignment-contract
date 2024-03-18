@@ -896,9 +896,8 @@ export const ContinentNft = [
   },
 ];
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const ContinentNftAddress: any = {
-  80001: import.meta.env.VITE_NFT_CONTRACT_ADDRESS_MATIC_MUMBAI,
-  31337: import.meta.env.VITE_NFT_CONTRACT_ADDRESS_LOCAL,
-  default: import.meta.env.VITE_NFT_CONTRACT_ADDRESS_LOCAL,
+export const ContinentNftAddress = {
+  80001: process.env.NFT_CONTRACT_ADDRESS_MATIC_MUMBAI,
+  31337: process.env.NFT_CONTRACT_ADDRESS_LOCAL,
+  'default': process.env.NFT_CONTRACT_ADDRESS_LOCAL,
 };

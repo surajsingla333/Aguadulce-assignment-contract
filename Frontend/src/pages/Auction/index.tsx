@@ -2,11 +2,22 @@
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { useNavigate } from "react-router-dom";
-import { readContract, readContracts, writeContract } from "@wagmi/core";
-import {formatEther} from "ethers"
+import {
+  readContract,
+  readContracts,
+  writeContract,
+  getNetwork,
+} from "@wagmi/core";
+import { formatEther } from "ethers";
 
-import { CONTINENT_NFT, ZERO_ADDRESS, AUCTION } from "../../utils/const";
-import { findTokenId, manageError } from "../../utils/helper";
+import { ZERO_ADDRESS } from "../../utils/const";
+import {
+  findTokenId,
+  manageError,
+  getDate,
+  getAuctionContract,
+  getContinentNftContract,
+} from "../../utils/helper";
 
 import Loader from "../../components/Loader";
 import BidModal from "../..//components/BidModal";
@@ -32,8 +43,15 @@ const AuctionComponent = () => {
   const getAuctionData = async () => {
     setIsLoading(true);
 
+    const network = getNetwork()?.chain?.id
+      ? getNetwork()?.chain?.id
+      : "default";
+
+    const CONTINENT_NFT = getContinentNftContract(network);
+    const AUCTION = getAuctionContract(network);
+
     try {
-      const contracts = [];
+      const contracts: any = [];
 
       for (let i = 1; i <= 7; i++) {
         contracts.push({
@@ -47,14 +65,11 @@ const AuctionComponent = () => {
         contracts,
       });
 
-      console.log({ readAuctionData });
-
       const auctionLiveNft: any = {};
       const nftContracts: any = [];
 
       for (let i = 0; i < readAuctionData.length; i += 1) {
         if (readAuctionData[i].status === "success") {
-          console.log("SFASF ", readAuctionData[i].result);
           const res: any = readAuctionData[i].result;
           if (res.filter((d: any) => d === ZERO_ADDRESS).length !== 2) {
             auctionLiveNft[`${i + 1}`] = { auction: res };
@@ -75,8 +90,6 @@ const AuctionComponent = () => {
           contracts: nftContracts,
         });
 
-        console.log({ readNftData });
-
         for (let i = 0; i < readNftData.length; i++) {
           if (readNftData[i].status === "success") {
             const tokenId = findTokenId(`${readNftData[i]?.result}`);
@@ -90,8 +103,6 @@ const AuctionComponent = () => {
           }
         }
 
-        console.log({ auctionLiveNft });
-
         setAuctionNftData(auctionLiveNft);
       } else {
         setIsEmptyAuction(true);
@@ -104,6 +115,12 @@ const AuctionComponent = () => {
 
   const checkUserStatus = async () => {
     try {
+      const network = getNetwork()?.chain?.id
+        ? getNetwork()?.chain?.id
+        : "default";
+
+      const CONTINENT_NFT = getContinentNftContract(network);
+
       const continentId = await readContract({
         ...CONTINENT_NFT,
         functionName: "ownerContinentTokenId",
@@ -127,13 +144,25 @@ const AuctionComponent = () => {
 
   const settleAuction = async (tokenId: number) => {
     try {
+      const network = getNetwork()?.chain?.id
+        ? getNetwork()?.chain?.id
+        : "default";
+
+      const CONTINENT_NFT = getContinentNftContract(network);
+      const AUCTION = getAuctionContract(network);
+
       const AuctionDataTemp = await writeContract({
         ...AUCTION,
         functionName: "settleAuction",
         args: [CONTINENT_NFT.address, tokenId],
       });
 
-      console.log("AuctionDataTemp", AuctionDataTemp);
+      if (AuctionDataTemp && AuctionDataTemp.hash) {
+        handleOnBidSuccess();
+      } else {
+        throw "Something went wrong while creating auction.";
+      }
+
     } catch (err) {
       manageError(err);
     }
@@ -195,6 +224,10 @@ const AuctionComponent = () => {
                       </h2>
                       <div>Bidder: {auctionData[5]}</div>
                       <div>Bid amount: {formatEther(auctionData[4])}</div>
+
+                      {Number(auctionData[2]) > 0 && (
+                        <div>Auction ends at: {getDate(auctionData[2])}</div>
+                      )}
 
                       <div>
                         <button

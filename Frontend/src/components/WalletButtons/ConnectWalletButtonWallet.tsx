@@ -7,17 +7,6 @@ type connectWalletParam = {
 export default function ConnectWalletButtonWallet({ msg }: connectWalletParam) {
   const { open } = useWeb3Modal();
 
-  //   useEffect(() => {
-  //     console.log("THis is from the dashboard of Wallet");
-
-  //     if (isConnected && isClicked) {
-  //       navigate("/walletDashboard");
-  //     } else {
-  //       navigate("/");
-  //       setIsClicked(false);
-  //     }
-  //   }, [isConnected]);
-
   return (
     <div>
       <button

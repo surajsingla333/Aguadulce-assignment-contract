@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { parseEther } from "ethers";
-import { writeContract } from "@wagmi/core";
-
-import { CONTINENT_NFT, AUCTION } from "../../utils/const";
-import {manageError} from "../../utils/helper"
+import { writeContract, getNetwork } from "@wagmi/core";
+import { manageError, getContinentNftContract, getAuctionContract } from "../../utils/helper";
 
 type AuctionModalT = {
   setShowAuctionModal: (bool: boolean) => any;
@@ -29,6 +27,14 @@ const AuctionModal = ({
 
   const putInAuction = async () => {
     let isValidInput: boolean = true;
+
+    const network = getNetwork()?.chain?.id
+      ? getNetwork()?.chain?.id
+      : "default";
+
+    const CONTINENT_NFT = getContinentNftContract(network);
+    const AUCTION = getAuctionContract(network);
+
     Object.values(auctionFormData).forEach((data) => {
       if (data <= 0) {
         isValidInput = false;
@@ -43,7 +49,6 @@ const AuctionModal = ({
           args: [AUCTION.address, nftIdToPutInAuction],
         });
 
-        console.log({ approveNft });
         if (approveNft && approveNft.hash) {
           const auctionCreateData = await writeContract({
             ...AUCTION,
@@ -52,14 +57,13 @@ const AuctionModal = ({
               CONTINENT_NFT.address,
               nftIdToPutInAuction,
               parseEther(`${auctionFormData.minPrice}`),
-              auctionFormData.auctionBidPeriod * 60 * 60,
+              auctionFormData.auctionBidPeriod * 60,
               auctionFormData.bidIncreasePercentage * 100,
               [],
               [],
             ],
           });
 
-          console.log({ auctionCreateData });
           if (auctionCreateData && auctionCreateData.hash) {
             handleOnAuctionSuccess();
             setShowAuctionModal(false);
@@ -134,9 +138,9 @@ const AuctionModal = ({
                 <input
                   type="number"
                   step={1}
-                  min="0"
+                  min="10"
                   className="shadow appearance-none border rounded w-full py-2 px-1 text-black text-sm"
-                  placeholder="Time in hours. This is the time the auction will wait for new bid after the highest bid, before ending the auction"
+                  placeholder="Time in minutes. This is the time the auction will wait for new bid after the highest bid, before ending the auction"
                   onChange={(e) => setFormData("auctionBidPeriod", e)}
                 />
                 <label className="block text-black text-sm font-bold mb-1 mt-10">

@@ -475,4 +475,9 @@ export const Auction = [
   },
 ];
 
-export const AuctionAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const AuctionAddress: any = {
+  80001: import.meta.env.VITE_AUCTION_CONTRACT_ADDRESS_MATIC_MUMBAI,
+  31337: import.meta.env.VITE_AUCTION_CONTRACT_ADDRESS_LOCAL,
+  default: import.meta.env.VITE_AUCTION_CONTRACT_ADDRESS_LOCAL,
+};
