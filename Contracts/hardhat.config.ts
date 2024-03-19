@@ -14,6 +14,11 @@ const config: HardhatUserConfig = {
         settings: {},
       },
     ]
+  },
+  networks: {
+    docker: {
+      url: `http://hardhat-docker:8545`
+    },
   }
 };
 
