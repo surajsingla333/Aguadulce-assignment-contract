@@ -1,0 +1,20 @@
+FROM node:18-alpine3.18
+
+# Make folder to put our files in
+RUN mkdir -p /usr/src/app
+RUN mkdir -p /usr/src/app/contracts
+
+WORKDIR /usr/src/app/contracts
+
+RUN apk add git;
+
+# Copy package json and install dependencies
+COPY package*.json ./
+RUN npm install --non-interactive --frozen-lockfile
+# Copy our app
+COPY . .
+
+COPY $PWD/docker/entrypoint.sh /usr/local/bin
+EXPOSE 8545
+
+CMD ["/bin/sh", "/usr/local/bin/entrypoint.sh"]

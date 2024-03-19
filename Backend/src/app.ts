@@ -2,11 +2,12 @@ import express from "express";
 import Web3, { Eip838ExecutionError, ContractExecutionError } from "web3";
 import cors from "cors";
 
-import { ContinentNft, ContinentNftAddress } from "../ABI/Continent";
+import { ContinentNft } from "../ABI/Continent";
+import { getNftContractAddress } from "../helpers/utils";
 import "dotenv/config";
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT;
 
 const accountSecretKey = process.env.ACCOUNT_PRIVATE_KEY;
 
@@ -26,9 +27,7 @@ app.post("/become-citizen", async (req, res) => {
 
     const nftContract = new web3.eth.Contract(
       ContinentNft,
-      ContinentNftAddress[networkId]
-        ? ContinentNftAddress[networkId]
-        : ContinentNftAddress.default
+      getNftContractAddress(networkId)
     );
 
     const account = await web3.eth.accounts.privateKeyToAccount(
