@@ -1,30 +1,22 @@
-# React + TypeScript + Vite
+# Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This folder consists of the Frontend web app for the assignment. 
 
-Currently, two official plugins are available:
+Using the application, the continent owners would be able to put continents on Auction, and transfer continents to the other users.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The non-owners would be able to bid in the auction and view all live auctions and continents.
 
-## Expanding the ESLint configuration
+The users will need to connect with their metamask wallets to perform the above tasks.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
 
-- Configure the top-level `parserOptions` property like this:
+## Process to run the frontend application:
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
+- Local setup
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+1. Go into backend directory in your terminal: `cd Frontend`.
+
+2. run the command `npm i` to install the required packages.
+
+3. Setup `.env` file taking reference from `.env.example`.
+
+4. run the command `npm run dev` to run the service on the local PORT 3000.
