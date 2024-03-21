@@ -8,6 +8,7 @@ import "dotenv/config";
 
 const app = express();
 const port = process.env.PORT;
+const env = process.env.NODE_ENV;
 
 const accountSecretKey = process.env.ACCOUNT_PRIVATE_KEY;
 
@@ -18,7 +19,11 @@ app.post("/become-citizen", async (req, res) => {
   try {
     const { continentId, value, networkId } = req.body;
 
-    let web3 = new Web3(new Web3.providers.HttpProvider(process.env.NODE_RPC));
+    let web3 = new Web3(
+      new Web3.providers.HttpProvider(
+        env === "docker" ? process.env.NODE_RPC_DOCKER : process.env.NODE_RPC
+      )
+    );
     if (networkId == 80001) {
       web3 = new Web3(
         new Web3.providers.HttpProvider(process.env.NODE_RPC_MATIC_MUMBAI)
