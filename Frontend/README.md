@@ -19,4 +19,4 @@ The users will need to connect with their metamask wallets to perform the above 
 
 3. Setup `.env` file taking reference from `.env.example`.
 
-4. run the command `npm run dev` to run the service on the local PORT 3006.
+4. run the command `npm run dev` to run the service on the local PORT 3000.
