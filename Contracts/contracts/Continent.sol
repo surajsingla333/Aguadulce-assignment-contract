@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-// Compatible with OpenZeppelin Contracts ^5.0.0
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
@@ -29,8 +28,8 @@ contract Continent is
     mapping(uint256 => uint256) public citizenTaxForContinent;
     mapping(address => uint256) public ownerContinentTokenId;
 
-    mapping(uint256 => address[]) public listOfCitizensOfContinent;
-    mapping(address => uint256[]) public listOfContinentOfCitizenship;
+    mapping(uint256 => address[]) private listOfCitizensOfContinent;
+    mapping(address => uint256[]) private listOfContinentOfCitizenship;
     mapping(uint256 => mapping(address => bool))
         public checkIsCitizenOfContinent;
 
@@ -143,6 +142,27 @@ contract Continent is
         return super.supportsInterface(interfaceId);
     }
 
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory data
+    )
+        public
+        override(ERC721Upgradeable, IERC721)
+        isContinentOwner(from)
+        checkNotContinentOwner(to)
+        isNotACitizen(to)
+    {
+        require(
+            ownerContinentTokenId[from] == tokenId,
+            "From address is not the owner of the token"
+        );
+        super.safeTransferFrom(from, to, tokenId, data);
+        ownerContinentTokenId[from] = 0;
+        ownerContinentTokenId[to] = tokenId;
+    }
+
     // Asignment specific functions
 
     // Function called by continent owner to update citizenTax
@@ -223,8 +243,20 @@ contract Continent is
         uint256 continentId = ownerContinentTokenId[_msgSender()];
 
         super.safeTransferFrom(_msgSender(), toAddress, continentId);
-        ownerContinentTokenId[_msgSender()] = 0;
-        ownerContinentTokenId[toAddress] = continentId;
         payable(owner()).transfer(msg.value);
+    }
+
+    // Get list of all citizens of the continent
+    function getCitizens(
+        uint256 continentId
+    ) public view returns (address[] memory) {
+        return listOfCitizensOfContinent[continentId];
+    }
+
+    // Get list of all continents the user is a citizen in
+    function getContinentOfCitizenship(
+        address user
+    ) public view returns (uint256[] memory) {
+        return listOfContinentOfCitizenship[user];
     }
 }

@@ -95,6 +95,9 @@ describe("Continent", function () {
       await expect(continent.connect(signers[1]).transferContinent(signers[8]))
         .to.be.reverted;
 
+      expect(await continent.ownerContinentTokenId(signers[1])).to.equal(1);
+      expect(await continent.ownerContinentTokenId(signers[8])).to.equal(0);
+
       // reverting if send lesser amount
       await expect(
         continent
@@ -108,6 +111,9 @@ describe("Continent", function () {
 
       expect(await continent.balanceOf(signers[1].address)).to.equal(0);
       expect(await continent.balanceOf(signers[8].address)).to.equal(1);
+
+      expect(await continent.ownerContinentTokenId(signers[1])).to.equal(0);
+      expect(await continent.ownerContinentTokenId(signers[8])).to.equal(1);
 
       expect(await ethers.provider.getBalance(owner)).to.equal(
         earlierOwnerBalance + teamsFees
@@ -173,18 +179,15 @@ describe("Continent", function () {
         true
       );
 
-      expect(
-        await continent.listOfContinentOfCitizenship(signers[8], 0)
-      ).to.equal(1);
+      const continentOfCitizenshipArray =
+        await continent.getContinentOfCitizenship(signers[8]);
+      expect(continentOfCitizenshipArray.length).to.equal(1);
+      expect(continentOfCitizenshipArray[0]).to.equal(1);
 
-      await expect(continent.listOfContinentOfCitizenship(signers[8], 1)).to.be
-        .reverted;
+      const citizensArray = await continent.getCitizens(1);
 
-      expect(await continent.listOfCitizensOfContinent(1, 0)).to.equal(
-        signers[8].address
-      );
-
-      await expect(continent.listOfCitizensOfContinent(1, 1)).to.be.reverted;
+      expect(citizensArray.length).to.equal(1);
+      expect(citizensArray[0]).to.equal(signers[8].address);
 
       expect(await ethers.provider.getBalance(owner)).to.equal(
         earlierOwnerBalance
@@ -209,9 +212,7 @@ describe("Continent", function () {
     });
 
     it("Signer 5 tries to be citizen of Continent 6 of Signer 6 but fails", async () => {
-      const { continent, signers } = await loadFixture(
-        deployAndMintContinent
-      );
+      const { continent, signers } = await loadFixture(deployAndMintContinent);
       await initialSetup();
 
       const citizenTaxForContinent6 = await continent.citizenTaxForContinent(6);
@@ -220,9 +221,8 @@ describe("Continent", function () {
       await expect(
         continent
           .connect(signers[5])
-          .becomeCitizen(6, { value: citizenTaxForContinent6})
+          .becomeCitizen(6, { value: citizenTaxForContinent6 })
       ).to.be.reverted;
-
     });
   });
 });

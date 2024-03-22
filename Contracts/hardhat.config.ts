@@ -7,12 +7,18 @@ const config: HardhatUserConfig = {
     compilers: [
       {
         version: "0.8.0",
+        settings: {},
       },
       {
         version: "0.8.20",
         settings: {},
       },
     ]
+  },
+  networks: {
+    docker: {
+      url: `http://hardhat-docker:8545`
+    },
   }
 };
 
