@@ -19,6 +19,9 @@ const config: HardhatUserConfig = {
     docker: {
       url: `http://hardhat-docker:8545`
     },
+    mumbai: {
+      url: "https://polygon-mumbai.infura.io/v3/${YOUR_INFURA_KEY}",
+    },
   }
 };
 
