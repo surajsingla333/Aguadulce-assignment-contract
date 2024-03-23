@@ -30,9 +30,9 @@ Contracts and deployment script inside **Contracts** folder.
 
 2. Backend deployed link: https://aguadulce-assignment.onrender.com/
 
-3. Continent NFT deployed contract address (Polygon mumbai)[https://mumbai.polygonscan.com/address/0xe432710973F49793166B7d7E663b4264DC4a971C]: 0xe432710973F49793166B7d7E663b4264DC4a971C
+3. Continent NFT deployed contract address [Polygon mumbai](https://mumbai.polygonscan.com/address/0xe432710973F49793166B7d7E663b4264DC4a971C): 0xe432710973F49793166B7d7E663b4264DC4a971C
 
-4. Auction deployed contract address (Polygon mumbai)[https://mumbai.polygonscan.com/address/0x637aF7ac88f151f8F1728472ADa4232768551fc8]: 0x637aF7ac88f151f8F1728472ADa4232768551fc8
+4. Auction deployed contract address [Polygon mumbai](https://mumbai.polygonscan.com/address/0x637aF7ac88f151f8F1728472ADa4232768551fc8): 0x637aF7ac88f151f8F1728472ADa4232768551fc8
 
 5. Video demo and description of the project (in synchronized order):
-   (Video 1)[https://www.loom.com/share/5181f378c9394378a3eca987bd6f4695?sid=119ed559-9c5b-43a1-9e4d-d1389ec92cbe], (Video 2)[https://www.loom.com/share/e8c72013302b4d328684fb44293e1bfc?sid=a0b17868-ce9a-4b08-921d-ba28b26f6b02], (Video 3)[https://www.loom.com/share/29642eb6ca46422daa0937e4b90122da?sid=61adecc6-456f-423c-9ad1-143d488f344a], (Video 4)[https://www.loom.com/share/aacd0278802c4ddab13447f4d119173c?sid=c1fb661d-c55d-4db7-9152-1a14864564f4], (Video 5)[https://www.loom.com/share/caf9c835a50d4eabbef52af8df6b0f41?sid=5f685990-9ae2-46f7-b68c-206c0c600f33]
+   [Video 1](https://www.loom.com/share/5181f378c9394378a3eca987bd6f4695?sid=119ed559-9c5b-43a1-9e4d-d1389ec92cbe), [Video 2](https://www.loom.com/share/e8c72013302b4d328684fb44293e1bfc?sid=a0b17868-ce9a-4b08-921d-ba28b26f6b02), [Video 3](https://www.loom.com/share/29642eb6ca46422daa0937e4b90122da?sid=61adecc6-456f-423c-9ad1-143d488f344a), [Video 4](https://www.loom.com/share/aacd0278802c4ddab13447f4d119173c?sid=c1fb661d-c55d-4db7-9152-1a14864564f4), [Video 5](https://www.loom.com/share/caf9c835a50d4eabbef52af8df6b0f41?sid=5f685990-9ae2-46f7-b68c-206c0c600f33)
