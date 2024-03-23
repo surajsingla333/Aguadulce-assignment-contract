@@ -30,20 +30,23 @@ app.post("/become-citizen", async (req, res) => {
       );
     }
 
+    const account = await web3.eth.accounts.privateKeyToAccount(
+      accountSecretKey
+    );
+    web3.eth.accounts.wallet.add(account);
+
+    web3.eth.defaultAccount = account.address;
+
     const nftContract = new web3.eth.Contract(
       ContinentNft,
       getNftContractAddress(networkId)
     );
 
-    const account = await web3.eth.accounts.privateKeyToAccount(
-      accountSecretKey
-    );
-
-    web3.eth.defaultAccount = account.address;
-
-    const result = await nftContract.methods
-      .becomeCitizen(continentId)
-      .send({ from: account.address, value: web3.utils.toWei(value, "ether") });
+    const tx = await nftContract.methods.becomeCitizen(continentId);
+    const result = await tx.send({
+      from: account.address,
+      value: web3.utils.toWei(value, "ether"),
+    });
 
     res.json({
       message: "Transaction submitted successfully",
